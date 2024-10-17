@@ -12,6 +12,8 @@ struct ContentView: View {
     @State private var result = 0
     @State private var selectedFrom = "h"
     @State private var selectedTo = "h"
+    @State private var alertTitle = ""
+    @State private var showAlert = false
     
     let choices = ["h", "min"]
     
@@ -48,25 +50,49 @@ struct ContentView: View {
                 }
             }
         }
+        .alert(alertTitle, isPresented: $showAlert) {
+            Button("OK") {
+                
+            }
+        }
+    }
+    
+    func displayAlert(title: String) {
+        alertTitle = title
+        showAlert = true
     }
     
     func conversion() {
+        if value < 0 {
+            displayAlert(title: "Incorrect value: negative number")
+        }
+        
         if selectedFrom == "h" {
             if selectedTo == "min" {
                 result = value * 60
             } else {
-                result = value
+                if value < 0 {
+                    displayAlert(title: "FYI: negative number + it's the same unit")
+                } else {
+                    displayAlert(title: "FYI: it's the same unit")
+                }
             }
         }
+        
         if selectedFrom == "min" {
             if selectedTo == "h" {
                 result = value / 60
             } else {
-                result = value
+                if value < 0 {
+                    displayAlert(title: "FYI: negative number + it's the same unit")
+                } else {
+                    displayAlert(title: "FYI: it's the same unit")
+                }
             }
         }
     }
 }
+
 
 #Preview {
     ContentView()
