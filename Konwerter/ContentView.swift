@@ -8,52 +8,51 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var value = 0
-    @State private var result = 0
-    @State private var selectedFrom = "h"
-    @State private var selectedTo = "h"
+    @State private var value = 0.0
+    @State private var result = 0.0
     @State private var alertTitle = ""
     @State private var showAlert = false
     
-    let choices = ["h", "min"]
+    enum Choices: String {
+        case h, min
+    }
+    
+    @State private var selectedFrom: Choices = .h
+    @State private var selectedTo: Choices = .min
     
     var body: some View {
         VStack {
             Form {
                 Section {
-                    TextField("Value", value: $value, format: .number)
+                    TextField("Value", value: $value, format: .number.precision(.fractionLength(2)))
                         .onChange(of: value) {
                                     conversion()
                                 }
                 }
                 Section {
                             Picker("From", selection: $selectedFrom) {
-                                ForEach(choices, id: \.self) {
-                                    Text($0)
-                                }
+                                Text("h").tag(Choices.h)
+                                Text("min").tag(Choices.min)
                             }
                             .onChange(of: selectedFrom) {
                                         conversion()
                                     }
                             Picker("To", selection: $selectedTo) {
-                                ForEach(choices, id: \.self) {
-                                    Text($0)
-                                }
+                                Text("h").tag(Choices.h)
+                                Text("min").tag(Choices.min)
                             }
                             .onChange(of: selectedTo) {
                                         conversion()
                                     }
                 }
                 Section {
-                    Text("The result is: \(result)")
+                    Text("The result is: \(result, specifier: "%.2f")")
                         .bold()
                 }
             }
         }
         .alert(alertTitle, isPresented: $showAlert) {
-            Button("OK") {
-                
-            }
+            Button("Dismiss", role: .cancel) {}
         }
     }
     
@@ -65,30 +64,18 @@ struct ContentView: View {
     func conversion() {
         if value < 0 {
             displayAlert(title: "Incorrect value: negative number")
+            return
         }
         
-        if selectedFrom == "h" {
-            if selectedTo == "min" {
-                result = value * 60
-            } else {
-                if value < 0 {
-                    displayAlert(title: "FYI: negative number + it's the same unit")
-                } else {
-                    displayAlert(title: "FYI: it's the same unit")
-                }
-            }
+        if selectedFrom == selectedTo {
+            displayAlert(title: "FYI: it's the same unit")
+            return
         }
         
-        if selectedFrom == "min" {
-            if selectedTo == "h" {
-                result = value / 60
-            } else {
-                if value < 0 {
-                    displayAlert(title: "FYI: negative number + it's the same unit")
-                } else {
-                    displayAlert(title: "FYI: it's the same unit")
-                }
-            }
+        if selectedFrom == .h  && selectedTo == .min {
+            result = value * 60
+        } else {
+            result = value / 60
         }
     }
 }
